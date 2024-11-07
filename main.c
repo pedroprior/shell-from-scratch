@@ -1,16 +1,20 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
+int lsh_mkdir(char **args);
 int lsh_cd(char **args);
 int lsh_help(char **args);
 int lsh_exit(char **args);
 
-char *builtin_str[] = {"cd", "help", "exit"};
+char *builtin_str[] = {"cd", "help", "mkdir", "exit"};
 
-int (*built_func[])(char **) = {&lsh_cd, &lsh_help, &lsh_exit};
+int (*built_func[])(char **) = {&lsh_cd, &lsh_help, &lsh_mkdir, &lsh_exit};
 
 int lsh_num_builtins() { return sizeof(builtin_str) / sizeof(char *); }
 
@@ -23,6 +27,18 @@ int lsh_cd(char **args) {
       perror("lsh");
     }
   }
+  return 1;
+}
+
+int lsh_mkdir(char **args) {
+  if (args[1] == NULL) {
+    fprintf(stderr, "lsh: expected argument to \"mkdir\"\n");
+  } else {
+    if (mkdir(args[1], S_IRWXU | S_IRWXG | S_IRWXO) == -1) {
+      printf("Error: %s\n", strerror(errno));
+    }
+  }
+
   return 1;
 }
 
